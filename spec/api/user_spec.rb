@@ -23,19 +23,14 @@ describe EStore::Api::User do
         expect(last_response.status).to eq(201)
       end
 
-      it 'sets cookie' do
-        post '/api/user', credentials
-
-        cookie_string = last_response.header["Set-Cookie"]
-        expect(cookie_string).to match(/api_key=.*; path=\/; expires=.*/)
-      end
-
       it 'returns user info' do
         post '/api/user', credentials
 
-        user = JSON.parse(last_response.body)
-        expect(user['phone']).to eq '13891438527'
-        expect(rack_mock_session.cookie_jar['api_key'].length).to be 40
+        user = EStore::User.first(phone: '13891438527')
+        user_info = JSON.parse(last_response.body)
+
+        expect(user_info['phone']).to eq '13891438527'
+        expect(user_info['api_key']).to eq user.api_key
       end
     end
 
@@ -60,20 +55,15 @@ describe EStore::Api::User do
     context 'valid credential' do
       let(:credentials) { {phone: '13891438527', password: '123456'} }
 
-      it 'sets cookie' do
-        post '/api/sign_in', credentials
-
-        cookie_string = last_response.header["Set-Cookie"]
-        expect(cookie_string).to match(/api_key=.*; path=\/; expires=.*/)
-      end
-
       it 'returns user info' do
         post '/api/sign_in', credentials
 
-        user = JSON.parse(last_response.body)
+        user = EStore::User.first(phone: '13891438527')
+        user_info = JSON.parse(last_response.body)
+
         expect(last_response.status).to eq(200)
-        expect(user['phone']).to eq '13891438527'
-        expect(rack_mock_session.cookie_jar['api_key'].length).to be 40
+        expect(user_info['phone']).to eq '13891438527'
+        expect(user_info['api_key']).to eq user.api_key
       end
     end
 
@@ -99,10 +89,10 @@ describe EStore::Api::User do
     before do
       EStore::User.all.destroy
       EStore::User.create({
-                                   phone: '13891438527',
-                                   encrypted_password: '123456',
-                                   api_key: 'valid_key'})
-      set_cookie "api_key=#{api_key}"
+                              phone: '13891438527',
+                              encrypted_password: '123456',
+                              api_key: 'valid_key'})
+      header 'Api-Key', api_key
     end
 
     context 'valid api key' do
@@ -112,7 +102,7 @@ describe EStore::Api::User do
 
         user = JSON.parse(last_response.body)
         expect(last_response.status).to eq(200)
-        expect(rack_mock_session.cookie_jar['api_key']).to eq api_key
+        expect(user['api_key']).to eq api_key
         expect(user['phone']).to eq(phone)
 
         post '/api/sign_in', {phone: phone, password: new_password}

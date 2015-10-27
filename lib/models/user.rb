@@ -10,7 +10,7 @@ module EStore
     property :created_at, DateTime
 
     class Entity < Grape::Entity
-      expose :phone, :created_at
+      expose :phone, :api_key, :created_at
     end
   end
 end

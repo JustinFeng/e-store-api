@@ -14,11 +14,6 @@ module EStore
         end
         post do
           user = EStore::User.create(phone: params[:phone], encrypted_password: params[:password])
-          cookies[:api_key] = {
-              value: user.api_key,
-              expires: Time.now + 1.month,
-              path: '/'
-          }
           present user
         end
 
@@ -51,11 +46,6 @@ module EStore
         user = EStore::User.first(phone: params[:phone])
         if user && user.encrypted_password == params[:password]
           user.update(api_key: DataMapper::Property::APIKey.generate)
-          cookies[:api_key] = {
-              value: user.api_key,
-              expires: Time.now + 1.month,
-              path: '/'
-          }
           status 200
           present user
         else
