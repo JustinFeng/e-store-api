@@ -7,6 +7,7 @@ gem 'rack-cors', require: 'rack/cors'
 gem 'data_mapper'
 gem 'dm-mysql-adapter'
 gem 'rake'
+gem 'httparty'
 
 group :development, :test do
   gem 'byebug'

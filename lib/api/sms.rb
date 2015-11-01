@@ -1,3 +1,5 @@
+require 'httparty'
+
 module EStore
   module Api
     class SMS < Grape::API
@@ -10,6 +12,10 @@ module EStore
         def same_phone_number_within_60_seconds
           EStore::SMS.count(:phone => params[:phone], :created_at.gt => Time.now - 60.seconds) > 0
         end
+
+        def generate_code
+          rand(1000000).to_s.rjust(6, '0')
+        end
       end
 
       resources :sms do
@@ -19,10 +25,20 @@ module EStore
         end
         post do
           if same_client_ip_within_60_seconds or same_phone_number_within_60_seconds
-            error! '短信发送过于频繁，请稍后再试', 400
+            error! '验证短信发送过于频繁，请稍后再试', 400
           else
-            EStore::SMS.create(client_ip: request.ip, phone: params[:phone])
-            body false
+            code = generate_code
+            response = HTTParty.post('http://yunpian.com/v1/sms/send.json',
+                                     body: {
+                                         apikey: 'API_KEY',
+                                         mobile: params[:phone],
+                                         text: "【猫爪网】您的验证码是#{code}。如非本人操作，请忽略本短信"})
+            if (JSON.parse(response.body)["code"] == 0)
+              EStore::SMS.create(client_ip: request.ip, phone: params[:phone], code: code)
+              body false
+            else
+              error! '验证短信发送失败，请稍后再试'
+            end
           end
         end
       end
