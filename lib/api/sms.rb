@@ -5,12 +5,16 @@ module EStore
     class SMS < Grape::API
 
       helpers do
-        def same_client_ip_within_60_seconds
+        def same_client_ip_within_60_seconds?
           EStore::SMS.count(:client_ip => request.ip, :created_at.gt => Time.now - 60.seconds) > 0
         end
 
-        def same_phone_number_within_60_seconds
+        def same_phone_number_within_60_seconds?
           EStore::SMS.count(:phone => params[:phone], :created_at.gt => Time.now - 60.seconds) > 0
+        end
+
+        def registered?
+          EStore::User.count(:phone => params[:phone]) > 0
         end
 
         def generate_code
@@ -24,7 +28,9 @@ module EStore
           requires :phone, type: String, desc: 'Phone number', regexp: /^1\d{10}$/
         end
         post do
-          if same_client_ip_within_60_seconds or same_phone_number_within_60_seconds
+          if registered?
+            error! '手机号已注册，请直接登陆', 400
+          elsif same_client_ip_within_60_seconds? or same_phone_number_within_60_seconds?
             error! '验证短信发送过于频繁，请稍后再试', 400
           else
             # code = generate_code

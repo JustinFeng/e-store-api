@@ -14,6 +14,7 @@ describe EStore::Api::SMS do
 
     before do
       EStore::SMS.all.destroy
+      EStore::User.all.destroy
       allow_any_instance_of(Object).to receive(:rand).and_return(123)
       allow(HTTParty).to receive(:post).and_return(double('Response', body: "{\"code\": #{response_code}}"))
     end
@@ -52,6 +53,19 @@ describe EStore::Api::SMS do
 
           expect(last_response.status).to eq(500)
           expect(JSON.parse(last_response.body)['error']).to eq('验证短信发送失败，请稍后再试')
+        end
+      end
+
+      context 'phone number already registered' do
+        before do
+          EStore::User.create({phone: '13891438527', encrypted_password: '123456'})
+        end
+
+        it 'responds 400' do
+          post '/api/sms', request_data
+
+          expect(last_response.status).to eq(400)
+          expect(JSON.parse(last_response.body)['error']).to eq('手机号已注册，请直接登陆')
         end
       end
 
