@@ -27,18 +27,22 @@ module EStore
           if same_client_ip_within_60_seconds or same_phone_number_within_60_seconds
             error! '验证短信发送过于频繁，请稍后再试', 400
           else
-            code = generate_code
-            response = HTTParty.post('http://yunpian.com/v1/sms/send.json',
-                                     body: {
-                                         apikey: 'API_KEY',
-                                         mobile: params[:phone],
-                                         text: "【猫爪网】您的验证码是#{code}。如非本人操作，请忽略本短信"})
-            if (JSON.parse(response.body)["code"] == 0)
-              EStore::SMS.create(client_ip: request.ip, phone: params[:phone], code: code)
-              body false
-            else
-              error! '验证短信发送失败，请稍后再试'
-            end
+            # code = generate_code
+            # response = HTTParty.post('http://yunpian.com/v1/sms/send.json',
+            #                          body: {
+            #                              apikey: 'API_KEY',
+            #                              mobile: params[:phone],
+            #                              text: "【猫爪网】您的验证码是#{code}。如非本人操作，请忽略本短信"})
+            # if (JSON.parse(response.body)["code"] == 0)
+            #   EStore::SMS.create(client_ip: request.ip, phone: params[:phone], code: code)
+            #   body false
+            # else
+            #   error! '验证短信发送失败，请稍后再试'
+            # end
+
+            code = '000123'
+            EStore::SMS.create(client_ip: request.ip, phone: params[:phone], code: code)
+            body false
           end
         end
       end
