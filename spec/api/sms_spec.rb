@@ -30,6 +30,7 @@ describe EStore::Api::SMS do
         sms = EStore::SMS.first(phone: '13891438527')
 
         expect(sms.phone).to eq '13891438527'
+        expect(sms.client_ip).to eq '127.0.0.1'
         expect(sms.code).to eq '000123'
       end
     end

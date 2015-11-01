@@ -8,7 +8,7 @@ module EStore
           requires :phone, type: String, desc: 'Phone number', regexp: /^1\d{10}$/
         end
         post do
-          EStore::SMS.create(phone: params[:phone])
+          EStore::SMS.create(client_ip: request.ip, phone: params[:phone])
           body false
         end
       end
