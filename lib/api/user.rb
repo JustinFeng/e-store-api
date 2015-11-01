@@ -11,10 +11,16 @@ module EStore
         params do
           requires :phone, type: String, desc: 'Phone number', regexp: /^1\d{10}$/
           requires :password, type: String, desc: 'User password', allow_blank: false
+          requires :code, type: String, desc: 'Verification code', regexp: /^\d{6}$/
         end
         post do
-          user = EStore::User.create(phone: params[:phone], encrypted_password: params[:password])
-          present user
+          sms = EStore::SMS.last(phone: params[:phone])
+          if sms && sms.code == params[:code]
+            user = EStore::User.create(phone: params[:phone], encrypted_password: params[:password])
+            present user
+          else
+            error! '验证码错误', 400
+          end
         end
 
         params do

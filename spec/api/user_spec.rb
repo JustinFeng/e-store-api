@@ -12,10 +12,11 @@ describe EStore::Api::User do
   describe 'POST /api/user' do
     before do
       EStore::User.all.destroy
+      EStore::SMS.create({client_ip: '127.0.0.1', phone: '13891438527', code: '123456'})
     end
 
     context 'valid credential' do
-      let(:credentials) { {phone: '13891438527', password: '123456'} }
+      let(:credentials) { {phone: '13891438527', password: '123456', code: '123456'} }
 
       it 'responds 201' do
         post '/api/user', credentials
@@ -35,12 +36,26 @@ describe EStore::Api::User do
     end
 
     context 'invalid credential' do
-      let(:credentials) { {phone: 'abc', password: '123456'} }
 
-      it 'responds 400' do
-        post '/api/user', credentials
+      context 'invalid phone' do
+        let(:credentials) { {phone: 'abc', password: '123456', code: '123456'} }
 
-        expect(last_response.status).to eq(400)
+        it 'responds 400' do
+          post '/api/user', credentials
+
+          expect(last_response.status).to eq(400)
+        end
+      end
+
+      context 'invalid code' do
+        let(:credentials) { {phone: '13891438527', password: '123456', code: '654321'} }
+
+        it 'responds 400' do
+          post '/api/user', credentials
+
+          expect(last_response.status).to eq(400)
+          expect(JSON.parse(last_response.body)['error']).to eq('验证码错误')
+        end
       end
     end
 
