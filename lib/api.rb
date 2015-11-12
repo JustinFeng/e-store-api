@@ -1,5 +1,6 @@
 require_relative 'api/user'
 require_relative 'api/sms'
+require_relative 'api/product'
 
 module EStore
   class API < Grape::API
@@ -13,5 +14,6 @@ module EStore
 
     mount Api::User
     mount Api::SMS
+    mount Api::Product
   end
 end
