@@ -3,6 +3,12 @@ module EStore
     class Product < Grape::API
 
       resources :product do
+        desc 'Get All Products'
+        get do
+          products = EStore::Product.all
+          present products
+        end
+
         route_param :product_id do
           desc 'Get Product Info'
           get do
