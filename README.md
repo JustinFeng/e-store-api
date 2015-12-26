@@ -4,7 +4,7 @@ It's continuously deployed to Heroku via CircleCI
 
 [![Circle CI](https://circleci.com/gh/JustinFeng/e-store-api.svg?style=shield)](https://circleci.com/gh/JustinFeng/e-store-api)
 
-Demo URL: 
+Demo URL: http(s)://e-store-api.herokuapp.com
 
 ## API Document
 
