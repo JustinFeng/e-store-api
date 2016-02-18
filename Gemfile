@@ -1,6 +1,8 @@
 # source 'http://ruby.taobao.org'
 source 'http://rubygems.org'
 
+ruby '2.2.4'
+
 gem 'grape'
 gem 'grape-entity'
 gem 'rack-cors', require: 'rack/cors'
