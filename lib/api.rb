@@ -15,5 +15,7 @@ module EStore
     mount Api::User
     mount Api::SMS
     mount Api::Product
+
+    add_swagger_documentation
   end
 end
